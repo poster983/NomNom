@@ -67,6 +67,9 @@ struct OSMDataView: View {
                         Text("Catagory: \(place!.category ?? "")")
                         Text("Address type: \(place!.addresstype ?? "")")
                         Text("Type: \(place!.type ?? "")")
+                        Text("Place ID: \(place?.placeID ?? -1)")
+                        Text("Place Rank: \(place?.placeRank ?? -1)")
+                        Text("Place Importance: \(place?.importance ?? -1)")
                         
                     }
                     
@@ -77,9 +80,16 @@ struct OSMDataView: View {
                         Text("PostCode: \(place!.address?.postcode ?? "")")
                         Text("Country: \(place!.address?.country ?? "")")
                     }
-                    if(place!.licence != nil) {
-                        Text(place!.licence!)
+                    
+                    Section(header: Text("Open Street Map")) {
+                        Text("OSM Type: \(place?.osmType ?? "")")
+                        Link("OSM ID: \(place!.osmID ?? -1)", destination: URL(string: "https://www.openstreetmap.org/\(place?.osmType ?? "")/\(place!.osmID ?? -1)")!)
+                        if(place!.licence != nil) {
+                            Text(place!.licence!)
+                        }
                     }
+                    
+                    
                     
                 }
                 #if !os(macOS)
