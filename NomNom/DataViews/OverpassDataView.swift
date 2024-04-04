@@ -16,15 +16,16 @@ private struct TagKV {
 }
 
 struct OverpassDataView: View {
-    var places: [Int: OPElement]
+    var places: [OverpassData]
     var body: some View {
-        let asArray = {
-            return places.values.map({p in p})
-        }()
+//        let asArray = {
+//            return places.values.map({p in p})
+//        }()
         
-        ForEach(asArray, id: \.id) { place in
+        ForEach(places, id: \.id) { place in
 //            let p = { place.wrappedValue } ()
             let title = place.tags["name"] ?? "No name: \(place.id)"
+            
             NavigationLink(destination: {
                 Group {
                     List {
@@ -37,6 +38,12 @@ struct OverpassDataView: View {
                             ForEach(tags, id: \.key) { kv in
                                 CopyableItem(title: kv.key, text: kv.value)
                             }
+                        }
+                        
+                        Section(header: Text("Open Street Map")) {
+                            CopyableItem(title: "ID", text: String(place.id))
+//                            CopyableItem(title: "ID", text: pla)
+                            
                         }
                     }
                     

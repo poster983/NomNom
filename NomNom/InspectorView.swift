@@ -19,7 +19,7 @@ struct InspectorView: View {
     
     @State var nominatiumData: NominatimPlace?;
     @State var appleData: [MKMapItem] = [];
-    @State var overpassData: [Int: OPElement] = [:];
+    @State var overpassData: [OverpassData] = [];
     var body: some View {
         Form {
             Picker("", selection: $mapController.searchMode) {
@@ -62,7 +62,7 @@ struct InspectorView: View {
         .onChange(of: mapController.selectedCoordinates, initial: false) {
             nominatiumData = nil;
             appleData = [];
-            overpassData = [:];
+            overpassData = [];
             
             getData()
         }
@@ -80,36 +80,40 @@ struct InspectorView: View {
             mapController.geocodedPoints = appleData
             mapController.geocodedBoundingBox = []
         } else if (mapController.searchMode == .overpass && !overpassData.isEmpty) {
-            mapController.geocodedPoints = [];
-            let visualizations = OPVisualizationGenerator
-                .mapKitVisualizations(forElements: overpassData)
-//            visualizations
-            for visualization in visualizations {
-                let name = overpassData[visualization.key]?.tags["name"]
-                switch visualization.value {
-                case .annotation(let annotation):
-                    let e = MKMapItem(placemark: MKPlacemark(coordinate: annotation.coordinate))
-                    e.name = name
-                    mapController.geocodedPoints.append(e)
-//                    newAnnotations.append(annotation)
-                    //                        case .polyline(let polyline):
-                    //                            polylines.append(polyline)
-                    //                        case .polylines(let newPolylines):
-                    //                            polylines.append(contentsOf: newPolylines)
-                case .polygon(let polygon):
-                    
-                    let e = MKMapItem(placemark: MKPlacemark(coordinate: polygon.coordinate ))
-                    e.name = name
-                    
-                    mapController.geocodedPoints.append(e)
-//                    polygons.append(polygon)
-//                case .polygons(let newPolygons):
-//                    newPolygons[0].in
-//                    polygons.append(contentsOf: newPolygons)
-                default:
-                    print("Unsupported type")
-                }
-            }
+            mapController.geocodedPoints = overpassData.map { data in
+                data.mapItem
+            };
+            
+            
+//            let visualizations = OPVisualizationGenerator
+//                .mapKitVisualizations(forElements: overpassData)
+////            visualizations
+//            for visualization in visualizations {
+//                let name = overpassData[visualization.key]?.tags["name"]
+//                switch visualization.value {
+//                case .annotation(let annotation):
+//                    let e = MKMapItem(placemark: MKPlacemark(coordinate: annotation.coordinate))
+//                    e.name = name
+//                    mapController.geocodedPoints.append(e)
+////                    newAnnotations.append(annotation)
+//                    //                        case .polyline(let polyline):
+//                    //                            polylines.append(polyline)
+//                    //                        case .polylines(let newPolylines):
+//                    //                            polylines.append(contentsOf: newPolylines)
+//                case .polygon(let polygon):
+//                    
+//                    let e = MKMapItem(placemark: MKPlacemark(coordinate: polygon.coordinate ))
+//                    e.name = name
+//                    
+//                    mapController.geocodedPoints.append(e)
+////                    polygons.append(polygon)
+////                case .polygons(let newPolygons):
+////                    newPolygons[0].in
+////                    polygons.append(contentsOf: newPolygons)
+//                default:
+//                    print("Unsupported type")
+//                }
+//            }
 //            mapController.geocodedPoints = overpassData.map({ point in
 //                point.geometry.
 //            })
