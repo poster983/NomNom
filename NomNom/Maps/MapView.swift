@@ -24,10 +24,20 @@ struct MapView: View {
                     
                     
                 }
-                if(mapController.geocodedBoundingBox.count > 0) {
-                    MapPolygon(points: mapController.geocodedBoundingBox)
-                        .foregroundStyle(.red.opacity(0.60))
+//                ForEach(mapController.geocodedBoundingBox) { point in
+//                    MapPolygon(points: mapController.geocodedBoundingBox)
+//                }
+                ForEach(0..<mapController.geocodedBoundingBox.count) { index in
+                    MapPolygon(points: mapController.geocodedBoundingBox[index])
+                                            .foregroundStyle(.red.opacity(0.60))
                 }
+                    //                        .foregroundStyle(.red.opacity(0.60))                }
+//                if(mapController.geocodedBoundingBox.count > 0) {
+//
+//
+//                    MapPolygon(points: mapController.geocodedBoundingBox)
+//                        .foregroundStyle(.red.opacity(0.60))
+//                }
                 
             }
             .coordinateSpace(.named("map"))

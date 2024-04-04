@@ -74,7 +74,7 @@ struct InspectorView: View {
         if(mapController.searchMode == .nominatim && nominatiumData != nil) {
             mapController.geocodedPoints = [MKMapItem(placemark: MKPlacemark( coordinate: CLLocationCoordinate2D(latitude: Double(nominatiumData!.lat!)!, longitude: Double(nominatiumData!.lon!)!)))]
             mapController.geocodedPoints[0].name = nominatiumData!.displayName
-            mapController.geocodedBoundingBox = nominatiumData!.mapkitBoundBox
+            mapController.geocodedBoundingBox = [ nominatiumData!.mapkitBoundBox]
             
         } else if (mapController.searchMode == .apple && !appleData.isEmpty) {
             mapController.geocodedPoints = appleData
@@ -82,6 +82,9 @@ struct InspectorView: View {
         } else if (mapController.searchMode == .overpass && !overpassData.isEmpty) {
             mapController.geocodedPoints = overpassData.map { data in
                 data.mapItem
+            };
+            mapController.geocodedBoundingBox = overpassData.map { data in
+                data.mapBoundingBox
             };
             
             
@@ -117,7 +120,7 @@ struct InspectorView: View {
 //            mapController.geocodedPoints = overpassData.map({ point in
 //                point.geometry.
 //            })
-            mapController.geocodedBoundingBox = []
+            
         } else {
             //remove all points
             mapController.geocodedPoints = [];
@@ -151,7 +154,7 @@ struct InspectorView: View {
 //                        return
                     }
                 } else if (mapController.searchMode == .overpass && overpassData.isEmpty) {
-                    overpassData = try await OverpassData.geocode(center: mapController.selectedCoordinates!)
+                    overpassData = try await OverpassData.fetchOverpassData(center: mapController.selectedCoordinates!)
                     if(overpassData.isEmpty) {
                         err = "No Data"
 //                        return

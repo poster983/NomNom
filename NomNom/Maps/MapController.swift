@@ -13,5 +13,5 @@ class MapController: ObservableObject {
     @Published var searchMode: SearchMode = .nominatim
     @Published var selectedCoordinates: CLLocationCoordinate2D?;
     @Published var geocodedPoints: [MKMapItem] = [];
-    @Published var geocodedBoundingBox: [MKMapPoint] = []
+    @Published var geocodedBoundingBox: [[MKMapPoint]] = []
 }
