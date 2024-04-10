@@ -5,204 +5,6 @@
 //  Created by Joseph Hassell on 3/27/24.
 //
 //
-//import Foundation
-//import CoreLocation
-//import SwiftOverpassAPI
-//import MapKit
-//import Contacts
-//
-/////filter for amenity|aeroway|aerialway|building|emergency|healthcare|man_made|military|office|natrual|public_transport|sport|water|railway|shop|tourism|leisure|historic
-//
-//class OverpassData {
-////    static let endpoint = "https://overpass-api.de"
-////    
-//    var id: String
-//    var tags: [String : String]
-//    
-//    var name: String {
-//        get {
-//            tags["name"] ?? id
-//        }
-//    };
-//    
-////    var address: CNPostalAddress {
-////        get {
-////            var address = CNPostalAddress();
-////            address.street = ""
-////        }
-////    }
-//    
-//    var center: CLLocationCoordinate2D
-//    var area: [CLLocationCoordinate2D] = []
-////    var poiType:
-//    
-//    var parent: OverpassData?
-//    
-//    var mapItem: MKMapItem {
-//        get {
-//            let e = MKMapItem(placemark: MKPlacemark(coordinate: center))
-//            e.name = name
-//            if(!area.isEmpty) {
-//                e.name! += " (Area)"
-//            }
-////            e.pointOfInterestCategory = MKPointOfInterestCategory.
-//            
-//            return e;
-//        }
-//    }
-//    var mapBoundingBox: [MKMapPoint] {
-//        get {
-//            return area.map {point in
-//                MKMapPoint(point)
-//            }
-//        }
-//    }
-//    
-//    
-//    init(id: String, tags: [String : String], center:CLLocationCoordinate2D, parent: OverpassData? = nil, area: [CLLocationCoordinate2D] = []) {
-//        self.id = id
-//        self.tags = tags
-//        self.center = center
-//        self.parent = parent
-//        self.area = area
-//    }
-//    
-//
-//    
-//    static func sortByFavorite(center: CLLocationCoordinate2D, elements: [Int: OPElement]) -> [OverpassData] {
-//        ///Define Best:
-//        //        ///We want the closest point to the selected point to be preferred
-//        //        ///if two points are close to each other we want the one that has more complete data (like a name, an address) to be preferred
-//        //        ///if the prefered point is inside any other points, we should attach the parent points to the best Point.
-//         // Filter out elements tagged as parking
-//         let filteredElements = elements.filter { _, element in
-////             element.tags.first { dict in
-////                return dict.value.range(of: "parking") != nil
-////             } == nil
-//             return element.tags["amenity"]?.range(of: "parking") == nil
-//         }
-//         
-//         // Convert to OverpassData for further processing
-//         let overpassDataElements = filteredElements.map { _, element -> OverpassData in
-//             // Assuming a simple case where OPElement has a center geometry
-//             switch element.geometry {
-//             case .center(let centerCoordinates):
-//                 return OverpassData(id: String(element.id), tags: element.tags, center: centerCoordinates)
-//             case .polygon(let area):
-//                 return OverpassData(id: String(element.id), tags: element.tags, center: OverpassData.centroidOfPolygon(coordinates: area), area: area)
-//             default:
-////                 print(element.meta.)
-//                 // Handle other geometry types as needed
-//                 return OverpassData(id: String(element.id), tags: element.tags, center: center) // Placeholder for other cases
-//             }
-//         }
-//         
-//         // Sort by proximity and completeness of data
-//         return overpassDataElements.sorted { first, second in
-//             let distanceFirst = distance(from: first.center, to: center)
-//             let distanceSecond = distance(from: second.center, to: center)
-//             
-//             if distanceFirst != distanceSecond {
-//                 return distanceFirst < distanceSecond
-//             } else {
-//                 // If distances are equal, prefer elements with more complete data (e.g., name, address)
-//                 let completenessFirst = first.name != nil
-//                 let completenessSecond = second.name != nil
-//                 return completenessFirst && !completenessSecond
-//             }
-//         }
-//     }
-//     
-//     // Helper function to calculate distance between two CLLocationCoordinate2D points
-//     static private func distance(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D) -> CLLocationDistance {
-//         let fromLocation = CLLocation(latitude: from.latitude, longitude: from.longitude)
-//         let toLocation = CLLocation(latitude: to.latitude, longitude: to.longitude)
-//         return fromLocation.distance(from: toLocation)
-//     }
-//    
-//    /// Calculate the centroid of a polygon given its vertices.
-//    /// - Parameter coordinates: An array of `CLLocationCoordinate2D` representing the polygon vertices.
-//    /// - Returns: The `CLLocationCoordinate2D` representing the centroid of the polygon.
-//    static func centroidOfPolygon(coordinates: [CLLocationCoordinate2D]) -> CLLocationCoordinate2D {
-//        // Ensure there are coordinates to avoid division by zero
-//        guard !coordinates.isEmpty else {
-//            return CLLocationCoordinate2D()
-//        }
-//        
-//        // Sum up all the latitude and longitude values
-//        let sum = coordinates.reduce((lat: 0.0, lon: 0.0)) { (result, coordinate) -> (lat: Double, lon: Double) in
-//            return (result.lat + coordinate.latitude, result.lon + coordinate.longitude)
-//        }
-//        
-//        // Calculate the average latitude and longitude
-//        let averageLat = sum.lat / Double(coordinates.count)
-//        let averageLon = sum.lon / Double(coordinates.count)
-//        
-//        // Return the centroid coordinate
-//        return CLLocationCoordinate2D(latitude: averageLat, longitude: averageLon)
-//    }
-//    
-//    
-//    static func geocode(center: CLLocationCoordinate2D, radius: Double = 50) async throws -> [OverpassData] {
-//
-//        let queryRegion = MKCoordinateRegion(
-//            center: center,
-//            latitudinalMeters: radius,
-//            longitudinalMeters: radius)
-//        let boundingBox = OPBoundingBox(region: queryRegion)
-//        
-////        do {
-////
-////        } catch {
-////            throw error
-////        }
-//
-//        let client = OPClient()
-//        client.endpoint = .kumiSystems
-//
-//        
-//        return try await withCheckedThrowingContinuation({
-//            (continuation: CheckedContinuation<[OverpassData], Error>) in
-//            do {
-//                let query = try OPQueryBuilder()
-//                    .setTimeOut(180) //1
-//                    .setElementTypes([.node, .way, .relation]) //2
-//                //                .addTagFilter(key: "network", value: "BART", exactMatch: false) //3
-//                //                .addTagFilter(key: "type", value: "route") //4
-////                    .addTagFilter(key: "amenity")
-//                    .addTagFilter(key: "~\"^(amenity|aeroway|aerialway|building|emergency|healthcare|man_made|military|office|natrual|public_transport|sport|water|railway|shop|tourism|leisure|historic)$\"~\".\"")
-//                    
-////                    .addTagFilter(key: "amenity!", value: "parking")
-//                    .setBoundingBox(boundingBox)
-//                    
-//                    .setOutputType(.geometry )
-//                    .buildQueryString()
-////                print(query[0].)
-//                
-//                client.fetchElements(query: query) { result in
-//                    switch result {
-//                    case .failure(let error):
-//                        continuation.resume(throwing: error)
-//                        
-//                    case .success(let elements):
-////                        print(elements) // Do something with returned the elements
-////                        elements.
-//                        continuation.resume(returning: sortByFavorite(center: center, elements: elements))
-//                        //                        continuation.resume(returning: image)
-//
-//                    }
-//                }
-//            } catch {
-//                continuation.resume(throwing: error)
-//            }
-//
-//            
-//        })
-//
-//    }
-//}
-
-
 import Foundation
 import CoreLocation
 import SwiftOverpassAPI
@@ -252,6 +54,88 @@ class OverpassData {
     }
     
     // MARK: - Public Methods
+    ///Calculates the area of the area bounding box
+    func calculateArea() -> Double {
+        let vertices = area
+        guard vertices.count >= 3 else {
+            // Not a polygon if there are fewer than 3 vertices
+            return 0.0
+        }
+
+        var sum1 = 0.0
+        var sum2 = 0.0
+
+        // Iterate over the vertices to compute the sums
+        for i in 0..<vertices.count - 1 {
+            sum1 += vertices[i].latitude * vertices[i + 1].longitude
+            sum2 += vertices[i].longitude * vertices[i + 1].latitude
+        }
+
+        // Closing the polygon by considering the edge from the last vertex to the first
+        sum1 += vertices[vertices.count - 1].latitude * vertices[0].longitude
+        sum2 += vertices[vertices.count - 1].longitude * vertices[0].latitude
+
+        // Calculate and return the absolute value of half the difference of the sums
+        return 0.5 * abs(sum1 - sum2)
+    }
+    
+    ///Calculates if the given point is inside the arrea of this location
+    // Determine if a point is inside the polygon defined by the area property
+    func isPointInArea(_ point: CLLocationCoordinate2D) -> Bool {
+        let testX = point.latitude
+        let testY = point.longitude
+        var isInside = false
+        var j = area.count - 1
+        
+        for i in 0..<area.count {
+            let xi = area[i].latitude, yi = area[i].longitude
+            let xj = area[j].latitude, yj = area[j].longitude
+            
+            let intersect = ((yi > testY) != (yj > testY)) &&
+                (testX < (xj - xi) * (testY - yi) / (yj - yi) + xi)
+            if intersect {
+                isInside = !isInside
+            }
+            
+            j = i
+        }
+        
+        return isInside
+    }
+
+
+    ///Takes a list of overpass data classes and finds parents for each of the points if any
+    static func findParents(with inputData: [OverpassData]) -> [OverpassData] {
+        var transformedData = inputData
+        
+        for i in 0..<transformedData.count {
+            var smallestAreaParent: (index: Int, area: Double) = (-1, Double.greatestFiniteMagnitude)
+            let childArea = transformedData[i].calculateArea() // Calculate child's area
+            
+            for j in 0..<inputData.count {
+                if i != j {
+                    let point = transformedData[i].center
+                    if inputData[j].isPointInArea(point) {
+                        let potentialParentArea = inputData[j].calculateArea()
+                        // Ensure the potential parent's area is larger than the child's area
+                        if potentialParentArea > childArea && potentialParentArea < smallestAreaParent.area {
+                            smallestAreaParent = (j, potentialParentArea)
+                        }
+                    }
+                }
+            }
+            
+            // Assign the smallest valid parent
+            if smallestAreaParent.index != -1 {
+                transformedData[i].parent = inputData[smallestAreaParent.index]
+            }
+        }
+        
+        return transformedData
+    }
+
+
+    
     /// Fetches Overpass API data and converts it into OverpassData objects.
     static func fetchOverpassData(center: CLLocationCoordinate2D, radius: Double = 50) async throws -> [OverpassData] {
         // Prepare the bounding box based on center and radius
@@ -259,25 +143,49 @@ class OverpassData {
         let boundingBox = OPBoundingBox(region: queryRegion)
         
         let client = OPClient()
-        client.endpoint = .kumiSystems // An example Overpass API endpoint
-        
-        let query = try OPQueryBuilder()
-            .setTimeOut(180)
-            .setElementTypes([.node, .way, .relation])
-            .addTagFilter(key: "~\"^(amenity|aeroway|aerialway|building|emergency|healthcare|man_made|military|office|natrual|public_transport|sport|water|railway|shop|tourism|leisure|historic)$\"~\".\"")
-            .setBoundingBox(boundingBox)
-            .setOutputType(.geometry)
-            .buildQueryString()
-        
+        client.endpoint = .main // An example Overpass API endpoint
+        ///Old query Builder
+//        let query = try OPQueryBuilder()
+//            .setTimeOut(180)
+//            .setElementTypes([.node, .way, .relation])
+//            .addTagFilter(key: "~\"^(amenity|aeroway|aerialway|building|emergency|healthcare|man_made|military|office|public_transport|sport|water|railway|shop|tourism|leisure|historic)$\"~\".\"")
+//            .setBoundingBox(boundingBox)
+//            .setOutputType(.geometry)
+//            .buildQueryString()
+        let coordString = "\(center.latitude),\(center.longitude)"
+        let tagFilters = "[~\"^(amenity|aeroway|aerialway|building|emergency|healthcare|man_made|military|office|public_transport|sport|water|railway|shop|tourism|leisure|historic)$\"~\".\"]";
+        let query = """
+[out:json][timeout:180];
+(
+// Existing features within bounding box
+node\(tagFilters)(around:\(radius),\(coordString));
+rel\(tagFilters)(around:\(radius),\(coordString));
+way\(tagFilters)(around:\(radius),\(coordString));
+          
+          
+is_in(\(coordString))->.a;
+way\(tagFilters)(pivot.a);
+//relation(pivot.a);
+);
+        // Output the results
+//out body;
+//>;
+//out skel qt;
+out geom;
+"""
+        print(query)
         return try await withCheckedThrowingContinuation { continuation in
             client.fetchElements(query: query) { result in
+                
                 switch result {
                 case .failure(let error):
                     continuation.resume(throwing: error)
                 case .success(let elements):
+                    print("Yay!")
                     let overpassData = elements.compactMap { convertToOverpassData($1) }
                     let sortedData = sortByFavorite(center: center, data: overpassData)
-                    continuation.resume(returning: sortedData)
+                    let withParents = findParents(with: sortedData)
+                    continuation.resume(returning: withParents)
                 }
             }
         }
@@ -304,10 +212,9 @@ class OverpassData {
                 return distanceFirst < distanceSecond
             } else {
                 // If distances are equal, prefer elements with more complete data
-                // Assuming 'name' presence as an indicator of data completeness
-                let completenessFirst = first.name != "Unnamed"
-                let completenessSecond = second.name != "Unnamed"
-                return completenessFirst && !completenessSecond
+                //base this off of how many tags each one has
+                return first.tags.count > second.tags.count
+
             }
         }
     }
@@ -324,7 +231,20 @@ class OverpassData {
         case .polyline(let line):
             let centroid = centroidOfPolygon(coordinates: line)
             return OverpassData(id: String(element.id), tags: element.tags, center: centroid, type: "polyline")
+        case .multiPolygon(let nested):
+            ///find the set of coordinates that has the greatest length
+            var best: [CLLocationCoordinate2D] = [];
+            for cSet in nested {
+                if(best.count < cSet.outerRing.count) {
+                    best = cSet.outerRing;
+                }
+            }
+            let centroid = centroidOfPolygon(coordinates: best)
+            return OverpassData(id: String(element.id), tags: element.tags, center: centroid, area: best, type: "multipolygon")
+            
+                        
         default:
+            print("Filtering out \(element)")
             return nil
         }
     }

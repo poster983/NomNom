@@ -26,7 +26,7 @@ struct ContentView: View {
                 InspectorView(mapController: mapController)
             }
             .onChange(of: mapController.geocodedPoints) {
-                print("mapController.geocodedPoint")
+//                print("mapController.geocodedPoint")
                 inspectorPresented = !mapController.geocodedPoints.isEmpty
             }
         

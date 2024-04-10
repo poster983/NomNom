@@ -27,30 +27,46 @@ struct OverpassDataView: View {
             let title = place.tags["name"] ?? "No name: \(place.id)"
             
             NavigationLink(destination: {
-                Group {
-                    List {
-                        CopyableItem(title: "Name", text: title)
-                        
-                        Section(header: Text("Tags")) {
-                            let tags: [TagKV] = place.tags.map({key, value in
-                                return TagKV(key: key, value: value)
-                            })
-                            ForEach(tags, id: \.key) { kv in
-                                CopyableItem(title: kv.key, text: kv.value)
-                            }
-                        }
-                        
-                        Section(header: Text("Open Street Map")) {
-                            CopyableItem(title: "ID", text: String(place.id))
-//                            CopyableItem(title: "ID", text: pla)
-                            
-                        }
-                    }
-                    
-                    
-                }
+//                Group {
+                    _OPDataViewPage(title: title, place: place)
+//                }
             }) {
                 Text(title)
+            }
+        }
+    }
+}
+
+private struct _OPDataViewPage: View {
+    var title: String ;
+    var place:OverpassData
+    var body: some View {
+        List {
+            CopyableItem(title: "Name", text: title)
+            
+            Section(header: Text("Tags")) {
+                let tags: [TagKV] = place.tags.map({key, value in
+                    return TagKV(key: key, value: value)
+                })
+                ForEach(tags, id: \.key) { kv in
+                    CopyableItem(title: kv.key, text: kv.value)
+                }
+            }
+            if(place.parent != nil) {
+                let parentTitle = place.parent?.name ?? "No name \(place.parent!.id)";
+                NavigationLink(destination: {
+                    _OPDataViewPage(title: parentTitle, place: place.parent!)
+                }) {
+                    Text("Parent: \(parentTitle)")
+                }
+            } else {
+                Text("No Parent")
+            }
+            
+            Section(header: Text("Open Street Map")) {
+                CopyableItem(title: "ID", text: String(place.id))
+//                            CopyableItem(title: "ID", text: pla)
+                
             }
         }
     }
