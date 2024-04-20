@@ -195,8 +195,8 @@ out geom;
     static func sortByFavorite(center: CLLocationCoordinate2D, data: [OverpassData]) -> [OverpassData] {
         return data.sorted { first, second in
             // Check for parking amenity tag to prioritize non-parking elements
-            let isParkingFirst = first.tags["amenity"] == "parking"
-            let isParkingSecond = second.tags["amenity"] == "parking"
+            let isParkingFirst = first.tags["amenity"]?.ranges(of: "parking") != nil
+            let isParkingSecond = second.tags["amenity"]?.ranges(of: "parking") != nil
             
             if isParkingFirst != isParkingSecond {
                 // If only one of the elements is parking, the non-parking one should come first
