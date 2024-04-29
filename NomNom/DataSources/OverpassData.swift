@@ -153,7 +153,7 @@ class OverpassData {
 //            .setOutputType(.geometry)
 //            .buildQueryString()
         let coordString = "\(center.latitude),\(center.longitude)"
-        let tagFilters = "[~\"^(amenity|aeroway|aerialway|building|emergency|healthcare|man_made|military|office|public_transport|sport|water|railway|shop|tourism|leisure|historic)$\"~\".\"]";
+        let tagFilters = "[~\"^(amenity|aeroway|aerialway|craft|building|emergency|healthcare|man_made|military|office|public_transport|sport|water|railway|shop|tourism|leisure|historic)$\"~\".\"]";
         let query = """
 [out:json][timeout:180];
 (
@@ -191,33 +191,93 @@ out geom;
         }
     }
     
+    private struct NonImportantTags {
+        let key: String;
+        let value: String;
+        var contains = false;
+    }
+    
+    private static func isNonImportant(_ data: OverpassData, with tags: [NonImportantTags]) -> Bool {
+        for tag in tags {
+            if let tagValue = data.tags[tag.key] {
+                if tag.contains && tagValue.contains(tag.value) {
+                    return true
+                } else if !tag.contains && tagValue == tag.value {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    
     /// Sorts an array of OverpassData based on proximity to a specified center and data completeness.
     static func sortByFavorite(center: CLLocationCoordinate2D, data: [OverpassData]) -> [OverpassData] {
+        let nonImportantTags = [
+            NonImportantTags(key: "amenity", value: "parking", contains: true),
+            NonImportantTags(key: "railway", value: "abandoned", contains: false),
+            NonImportantTags(key: "amenity", value: "toilets", contains: false),
+            NonImportantTags(key: "building", value: "roof", contains: false)
+
+        ]
         return data.sorted { first, second in
-            // Check for parking amenity tag to prioritize non-parking elements
-            let isParkingFirst = first.tags["amenity"]?.ranges(of: "parking") != nil
-            let isParkingSecond = second.tags["amenity"]?.ranges(of: "parking") != nil
-            
-            if isParkingFirst != isParkingSecond {
-                // If only one of the elements is parking, the non-parking one should come first
-                return isParkingSecond
-            }
+            // Check if entries are non-important based on tags
+            let isNonImportantFirst = isNonImportant(first, with: nonImportantTags)
+            let isNonImportantSecond = isNonImportant(second, with: nonImportantTags)
 
-            // Calculate distance from the center for both elements
-            let distanceFirst = distance(from: first.center, to: center)
-            let distanceSecond = distance(from: second.center, to: center)
-
-            // If distances are different, sort by distance
-            if distanceFirst != distanceSecond {
-                return distanceFirst < distanceSecond
+            if isNonImportantFirst && !isNonImportantSecond {
+                // If first is non-important but second is not, second should come first
+                return false
+            } else if !isNonImportantFirst && isNonImportantSecond {
+                // If second is non-important but first is not, first should come first
+                return true
             } else {
-                // If distances are equal, prefer elements with more complete data
-                //base this off of how many tags each one has
-                return first.tags.count > second.tags.count
+                // If both are non-important or both are not non-important, sort by distance
+                let distanceFirst = distance(from: first.center, to: center)
+                let distanceSecond = distance(from: second.center, to: center)
 
+                if distanceFirst != distanceSecond {
+                    return distanceFirst < distanceSecond
+                } else {
+                    // If distances are equal, sort by the number of tags
+                    return first.tags.count > second.tags.count
+                }
             }
         }
     }
+
+
+    
+    /// Sorts an array of OverpassData based on proximity to a specified center and data completeness.
+//    static func sortByFavorite(center: CLLocationCoordinate2D, data: [OverpassData]) -> [OverpassData] {
+//        
+//        
+//        return data.sorted { first, second in
+//            first.tags["amenity"]?.contains("parking")
+//
+//            // Check for parking amenity tag to prioritize non-parking elements
+////            let isParkingFirst = first.tags["amenity"]?.ranges(of: "parking") != nil
+////            let isParkingSecond = second.tags["amenity"]?.ranges(of: "parking") != nil
+////            
+////            if isParkingFirst != isParkingSecond {
+////                // If only one of the elements is parking, the non-parking one should come first
+////                return isParkingSecond
+////            }
+//
+//            // Calculate distance from the center for both elements
+//            let distanceFirst = distance(from: first.center, to: center)
+//            let distanceSecond = distance(from: second.center, to: center)
+//
+//            // If distances are different, sort by distance
+//            if distanceFirst != distanceSecond {
+//                return distanceFirst < distanceSecond
+//            } else {
+//                // If distances are equal, prefer elements with more complete data
+//                //base this off of how many tags each one has
+//                return first.tags.count > second.tags.count
+//
+//            }
+//        }
+//    }
 
     
     // MARK: - Private Helper Methods
