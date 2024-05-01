@@ -216,7 +216,8 @@ out geom;
             NonImportantTags(key: "amenity", value: "parking", contains: true),
             NonImportantTags(key: "railway", value: "abandoned", contains: false),
             NonImportantTags(key: "amenity", value: "toilets", contains: false),
-            NonImportantTags(key: "building", value: "roof", contains: false)
+            NonImportantTags(key: "building", value: "roof", contains: false),
+            NonImportantTags(key: "tourism", value: "artwork", contains: false)
 
         ]
         return data.sorted { first, second in
