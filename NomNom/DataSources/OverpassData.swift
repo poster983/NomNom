@@ -137,7 +137,7 @@ class OverpassData {
 
     
     /// Fetches Overpass API data and converts it into OverpassData objects.
-    static func fetchOverpassData(center: CLLocationCoordinate2D, radius: Double = 50) async throws -> [OverpassData] {
+    static func fetchOverpassData(center: CLLocationCoordinate2D, radius: Double = 30) async throws -> [OverpassData] {
         // Prepare the bounding box based on center and radius
         let queryRegion = MKCoordinateRegion(center: center, latitudinalMeters: radius, longitudinalMeters: radius)
         let boundingBox = OPBoundingBox(region: queryRegion)
