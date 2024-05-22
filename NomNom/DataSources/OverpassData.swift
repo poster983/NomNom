@@ -214,11 +214,13 @@ out geom;
     static func sortByFavorite(center: CLLocationCoordinate2D, data: [OverpassData]) -> [OverpassData] {
         let nonImportantTags = [
             NonImportantTags(key: "amenity", value: "parking", contains: true),
-            NonImportantTags(key: "railway", value: "abandoned", contains: false),
-            NonImportantTags(key: "amenity", value: "toilets", contains: false),
-            NonImportantTags(key: "building", value: "roof", contains: false),
-            NonImportantTags(key: "tourism", value: "artwork", contains: false)
-
+            NonImportantTags(key: "amenity", value: "atm"),
+            NonImportantTags(key: "railway", value: "abandoned"),
+            NonImportantTags(key: "amenity", value: "toilets"),
+            NonImportantTags(key: "building", value: "roof"),
+            NonImportantTags(key: "tourism", value: "artwork"),
+            NonImportantTags(key: "landuse", value: "grass"),
+            NonImportantTags(key: "building:part", value: "yes")
         ]
         return data.sorted { first, second in
             // Check if entries are non-important based on tags
